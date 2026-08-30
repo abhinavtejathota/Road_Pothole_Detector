@@ -1,0 +1,282 @@
+/* ── Survey map ─────────────────────────────────────────────────────────── */
+.survey-map-wrap { position: relative; border-radius: var(--radius-lg); overflow: hidden; }
+.survey-map-hint {
+  position: absolute;
+  z-index: 1000;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+.survey-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.65rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.survey-legend-item { display: inline-flex; align-items: center; gap: 0.35rem; }
+.survey-legend-item i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+.survey-toolbar { margin-bottom: 0; }
+.survey-corridor-form { display: flex; flex-direction: column; gap: 0.45rem; }
+.survey-corridor-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+.survey-corridor-row .input { flex: 1 1 220px; min-width: 0; }
+.survey-corridor-hit { font-size: 0.75rem; margin: 0; }
+.survey-draw-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-top: 0.35rem;
+}
+.survey-route-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+.survey-route-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.84rem;
+}
+.survey-route-option:hover { background: var(--surface-2); }
+.survey-route-option.is-selected {
+  border-color: #1a73e8;
+  box-shadow: inset 3px 0 0 #1a73e8;
+  background: color-mix(in srgb, #1a73e8 8%, var(--surface));
+}
+.survey-route-steps {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.75rem 0.5rem 1.4rem;
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  font-size: 0.82rem;
+}
+.survey-route-steps li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.28rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+.survey-route-steps li:last-child { border-bottom: none; }
+.survey-place-hits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-height: 180px;
+  overflow: auto;
+  background: var(--surface);
+}
+.survey-place-hits li { border-bottom: 1px solid var(--border); }
+.survey-place-hits li:last-child { border-bottom: 0; }
+.survey-place-hit {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: inherit;
+}
+.survey-place-hit:hover { background: var(--surface-2); }
+@media (max-width: 900px) {
+  .dashboard-map-with-lengths { grid-template-columns: 1fr; }
+  .dashboard-geo-field { max-width: none; flex: 1 1 100%; }
+}
+
+.survey-toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.survey-map-legend {
+  margin-bottom: 0.75rem;
+}
+
+.survey-focus-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+.survey-focus-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+  color: var(--text);
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+}
+.survey-focus-option input {
+  width: auto;
+  accent-color: var(--accent);
+}
+
+.survey-admin-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+.survey-admin-controls .form-group { min-width: 200px; }
+.survey-msg { margin-top: 0.75rem; font-size: 0.88rem; }
+
+.alert-survey-existing {
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  color: #4338ca;
+}
+
+.survey-assignment-banner {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 0.85rem;
+}
+
+.survey-assignment-banner-existing {
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.survey-assignment-banner-over {
+  border-color: rgba(190, 24, 93, 0.45);
+  box-shadow: inset 3px 0 0 #be185d;
+}
+
+.survey-assignment-banner-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.survey-assignment-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--assignment);
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+
+.survey-assignment-banner-over .survey-assignment-swatch {
+  background: linear-gradient(135deg, var(--assignment) 50%, #be185d 50%);
+}
+
+.survey-assignment-banner-title {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--text);
+}
+
+.survey-assignment-banner-stats {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.88rem;
+}
+
+.survey-assignment-target {
+  color: var(--muted);
+  font-family: var(--font);
+}
+
+.survey-assignment-banner-note {
+  margin: 0.45rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.survey-assignment-over-note {
+  color: #9d174d;
+  font-weight: 500;
+}
+
+.survey-legend-assignment {
+  font-weight: 600;
+  color: #4338ca;
+}
+
+.survey-legend-over-target {
+  font-weight: 600;
+  color: #9d174d;
+}
+
+.survey-legend-swatch-existing,
+.survey-legend-item .survey-legend-swatch-existing {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--assignment);
+}
+
+.survey-legend-swatch-over,
+.survey-legend-item .survey-legend-swatch-over {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: #be185d;
+}
+
+.survey-row-selected td {
+  background: rgba(15, 58, 95, 0.06);
+}
+
+.survey-row-selected td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.map-box.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  color: var(--muted);
+  border-radius: var(--radius-lg);
+}
+

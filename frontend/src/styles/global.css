@@ -1,0 +1,14 @@
+/* Staff portal styles — split by page/component; shared layers first. */
+@import "./tokens.css";
+@import "./ui.css";
+@import "./responsive.css";
+@import "../components/Layout.css";
+@import "../components/CoveredRibbonModal.css";
+@import "../pages/Login.css";
+@import "../pages/Survey.css";
+@import "../pages/Dashboard.css";
+@import "../pages/Tracking.css";
+@import "../pages/Detection.css";
+@import "../pages/ModelBench.css";
+@import "../pages/FieldCapture.css";
+@import "../pages/Complaints.css";

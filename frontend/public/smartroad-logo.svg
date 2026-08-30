@@ -1,0 +1,11 @@
+<svg width="100%" viewBox="0 0 680 150" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>smartroad logo</title>
+<desc>The smartroad wordmark in white with a green period and a scan-ring road mark.</desc>
+<circle cx="118" cy="75" r="30" fill="none" stroke="#F4F7F9" stroke-width="3"/>
+<path d="M102 85 L118 71 L134 85" fill="none" stroke="#F4F7F9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M102 93 L118 79 L134 93" fill="none" stroke="#F4F7F9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<circle cx="118" cy="92" r="4.5" fill="#2BE38A"/>
+<text x="176" y="90" font-family="Poppins, system-ui, sans-serif" font-size="44" font-weight="600">
+<tspan fill="#F4F7F9">smartroad</tspan><tspan fill="#2BE38A">.</tspan>
+</text>
+</svg>

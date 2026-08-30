@@ -1,0 +1,148 @@
+/* ── Mobile / phone layout (portal in browser) ───────────────────────────── */
+@media (max-width: 640px) {
+  .app-shell {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  .topbar {
+    padding: 0.55rem 0.75rem;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    gap: 0.4rem;
+    flex-wrap: nowrap;
+  }
+
+  .topbar-brand-title { font-size: 0.95rem; }
+  .user-chip {
+    max-width: 7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.72rem;
+  }
+  .role-badge { display: none; }
+  .topbar .btn { padding: 0.4rem 0.65rem; font-size: 0.75rem; }
+
+  .content {
+    padding: 0.85rem 0.85rem 1.5rem;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+  .content > * { max-width: 100%; }
+
+  .page-header,
+  .page-title-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .grid-kpi,
+  .grid-kpi-field {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+
+  .input,
+  .select,
+  textarea.input,
+  .form-control {
+    font-size: 16px; /* avoids iOS focus zoom */
+    max-width: 100%;
+  }
+
+  .btn { min-height: 44px; }
+  .btn-row,
+  .table-actions,
+  .survey-toolbar,
+  .bench-controls,
+  .bench-cam-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .btn-row .btn,
+  .survey-toolbar .btn {
+    flex: 1 1 auto;
+  }
+
+  /* Model testing: stack live + annotated full-width; show whole portrait frame */
+  .bench-cam-grid {
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+  }
+  .bench-cam-frame {
+    aspect-ratio: 3 / 4;
+    max-height: min(68dvh, 640px);
+    width: 100%;
+  }
+  .bench-cam-media,
+  .bench-page .det-media {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
+  }
+
+  .survey-corridor-row,
+  .dashboard-geo-row,
+  .survey-admin-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .survey-corridor-row .input,
+  .dashboard-geo-field,
+  .survey-admin-controls .form-group {
+    max-width: none;
+    width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .survey-map-wrap,
+  .leaflet-container,
+  .dashboard-map-main,
+  .tracking-map-main {
+    min-height: 240px;
+    height: min(55vh, 420px);
+  }
+
+  .table-wrap { -webkit-overflow-scrolling: touch; }
+  .table-wrap table { font-size: 0.78rem; }
+
+  .modal,
+  .modal-panel,
+  .modal-card {
+    width: calc(100vw - 1.25rem) !important;
+    max-width: calc(100vw - 1.25rem) !important;
+    margin: 0.5rem;
+  }
+
+  .login-card,
+  .login-panel {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    min-height: 100dvh;
+  }
+
+  .login-page,
+  .login-shell {
+    padding: 0;
+  }
+
+  .card { padding: 0.85rem; }
+  .form-row { grid-template-columns: 1fr; }
+
+  .det-map-bar { grid-template-columns: 1fr; }
+  .map-links-ribbon { flex-wrap: wrap; }
+}
+
+@media (max-width: 420px) {
+  .grid-kpi,
+  .grid-kpi-field {
+    grid-template-columns: 1fr;
+  }
+  .topbar-brand-title { display: none; }
+}
+

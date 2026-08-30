@@ -1,0 +1,32 @@
+[Unit]
+Description=SmartRoad finalize worker (ffmpeg + S3 — separate from portal)
+After=network-online.target
+Wants=network-online.target
+# Start alongside the portal; does not require Flask to be up to drain a leftover queue.
+
+[Service]
+Type=simple
+WorkingDirectory=__ROOT__
+ExecStart=__ROOT__/venv/bin/python -u __ROOT__/scripts/smartroad_worker.py
+# Fallbacks if venv path differs — install script rewrites ExecStart when needed.
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=0
+KillMode=mixed
+TimeoutStopSec=120
+Nice=10
+CPUWeight=50
+IOWeight=50
+LimitNOFILE=65535
+User=__USER__
+Group=__GROUP__
+Environment=PYTHONUNBUFFERED=1
+Environment=FINALIZE_EXTERNAL_WORKER=1
+Environment=FINALIZE_S3_CONCURRENCY=8
+Environment=OMP_NUM_THREADS=2
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=smartroad-worker
+
+[Install]
+WantedBy=multi-user.target

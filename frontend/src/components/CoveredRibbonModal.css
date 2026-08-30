@@ -1,0 +1,72 @@
+/* Capture REC badge — safety yellow (brand) */
+.field-preview {
+  position: relative;
+}
+.field-rec-badge {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.65rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.82);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+.field-rec-badge::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #E8B40A;
+  box-shadow: 0 0 0 0 rgba(232, 180, 10, 0.55);
+  animation: field-rec-pulse 1.2s ease-out infinite;
+}
+.field-rec-badge.is-paused::before {
+  background: #94a3b8;
+  animation: none;
+  box-shadow: none;
+}
+@keyframes field-rec-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(232, 180, 10, 0.55); }
+  70% { box-shadow: 0 0 0 8px rgba(232, 180, 10, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 180, 10, 0); }
+}
+
+.covered-ribbon-modal {
+  max-width: 560px;
+  width: min(96vw, 560px);
+}
+.covered-ribbon-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.65rem;
+  align-items: center;
+}
+.covered-ribbon-legend i {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.35rem;
+  border-radius: 2px;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+}
+.covered-ribbon-progress {
+  margin-left: auto;
+  color: var(--muted, #6b7c8a);
+  font-size: 0.75rem;
+}
+.covered-ribbon-map {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border, #e5ebf0);
+}
+

@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "SmartRoad Citizen",
+    "slug": "smartroad-reporter",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "sdkVersion": "54.0.0",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f172a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.smartroad.reporter",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "GPS is attached to your road complaint.",
+        "NSCameraUsageDescription": "Capture a photo of the road issue.",
+        "NSAppTransportSecurity": { "NSAllowsArbitraryLoads": true }
+      }
+    },
+    "android": {
+      "package": "com.smartroad.reporter",
+      "versionCode": 1,
+      "usesCleartextTraffic": true,
+      "adaptiveIcon": {
+        "backgroundColor": "#0f172a",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "INTERNET"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow SmartRoad to attach GPS to your complaint."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow SmartRoad to upload a photo of the road issue.",
+          "cameraPermission": "Allow SmartRoad to capture a photo of the road issue."
+        }
+      ],
+      "./plugins/withArm64Only"
+    ]
+  }
+}

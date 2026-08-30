@@ -1,0 +1,8 @@
+# Deps for model_testing train + RF-DETR (install on top of root requirements.txt)
+#   pip install -r tools/ml/requirements.txt
+
+rfdetr[train]>=1.6.0
+Pillow>=10.0.0
+python-dotenv>=1.0.0
+# roboflow is also in root requirements.txt — needed for download_data.py
+roboflow>=1.1.0

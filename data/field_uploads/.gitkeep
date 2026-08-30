@@ -1,0 +1,4 @@
+# Local Capture uploads when S3 is not configured.
+# Safe to delete; recreated automatically on next field upload.
+*
+!.gitkeep

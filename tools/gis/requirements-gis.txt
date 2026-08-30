@@ -1,0 +1,8 @@
+# GIS import tools (optional — not needed for core app runtime)
+# Install: pip install -r tools/gis/requirements-gis.txt
+
+geopandas>=0.14.0
+shapely>=2.0.0
+pyogrio>=0.7.0
+pyarrow>=14.0.0
+osmium>=4.0.0

@@ -1,0 +1,43 @@
+# First line: run the portal with `python web_app.py` (detection + model bench are in the React UI).
+git+https://github.com/sunsmarterjie/yolov12.git
+# opencv-python
+# gradio
+# numpy
+# matplotlib
+# scipy
+#pip install -r requirements.txt
+
+ultralytics
+opencv-python
+numpy
+matplotlib
+scipy
+# gradio
+roboflow
+supervision
+# pip install exifread pymediainfo
+exifread
+pymediainfo
+
+# New deps for S3 + .env support
+boto3>=1.34.0
+python-dotenv>=1.0.0
+
+# Re-encodes annotated videos to H.264 so they play in <video> tags — opencv-python
+# can't write H.264 directly (needs a separately-licensed OpenH264 DLL), so this
+# bundles a static ffmpeg binary with libx264 built in.
+imageio-ffmpeg>=0.5.0
+
+# Phase 3 — Flask web app (vendor management, task allocation, dashboard)
+flask>=3.0.0
+flask-login>=0.6.3
+werkzeug>=3.0.0
+psycopg2-binary>=2.9.9
+pandas
+openpyxl
+python-docx>=1.1.0
+
+# Optional: production WSGI server (Windows-friendly, unlike gunicorn).
+# Run with: waitress-serve --host=0.0.0.0 --port=5000 --threads=16 web_app:application
+waitress>=3.0.0
+

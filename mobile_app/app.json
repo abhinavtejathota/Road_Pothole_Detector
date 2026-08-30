@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "SmartRoad Field",
+    "slug": "smartroad-mobile",
+    "version": "1.0.2",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "sdkVersion": "54.0.0",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B3D5C"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Used for survey routes and GPS capture while filming roads.",
+        "NSCameraUsageDescription": "Used to record road survey video.",
+        "NSMicrophoneUsageDescription": "Used while recording survey video.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
+    },
+    "android": {
+      "package": "com.smartroad.field",
+      "versionCode": 3,
+      "usesCleartextTraffic": true,
+      "adaptiveIcon": {
+        "backgroundColor": "#0B3D5C",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "./plugins/withCleartextTraffic",
+      "./plugins/withApkOptimize",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow SmartRoad Field to record road survey video.",
+          "microphonePermission": "Allow SmartRoad Field to record audio with survey video.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow SmartRoad Field to use your location for survey routes and GPS capture."
+        }
+      ]
+    ]
+  }
+}

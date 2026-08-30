@@ -1,0 +1,64 @@
+=== Andhra Pradesh (state_id=1, state_key=andhra) ===
+district_id	name
+745	Alluri Sitharama Raju
+744	Anakapalli
+502	Anantapur
+753	Annamayya
+750	Bapatla
+503	Chittoor
+505	East Godavari
+748	Eluru
+506	Guntur
+746	Kakinada
+747	Konaseema
+510	Krishna
+511	Kurnool
+755	Nandyal
+749	Ntr
+751	Palnadu
+743	Parvathipuram Manyam
+517	Prakasam
+515	Spsr Nellore
+754	Sri Sathya Sai
+519	Srikakulam
+752	Tirupati
+520	Visakhapatanam
+521	Vizianagaram
+523	West Godavari
+504	Y.S.R.
+
+=== Telangana (state_id=2, state_key=telangana) ===
+district_id	name
+501	Adilabad
+690	Bhadradri Kothagudem
+686	Hanumakonda
+507	Hyderabad
+681	Jagitial
+689	Jangoan
+687	Jayashankar Bhupalapally
+695	Jogulamba Gadwal
+685	Kamareddy
+508	Karimnagar
+509	Khammam
+699	Kumuram Bheem Asifabad
+688	Mahabubabad
+512	Mahabubnagar
+684	Mancherial
+513	Medak
+700	Medchal Malkajgiri
+720	Mulugu
+694	Nagarkurnool
+514	Nalgonda
+721	Narayanpet
+680	Nirmal
+516	Nizamabad
+682	Peddapalli
+683	Rajanna Sircilla
+518	Ranga Reddy
+691	Sangareddy
+692	Siddipet
+696	Suryapet
+698	Vikarabad
+693	Wanaparthy
+522	Warangal
+697	Yadadri Bhuvanagiri

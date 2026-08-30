@@ -1,0 +1,212 @@
+# Secrets & local config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets.json
+.aws/
+
+# Virtual environments
+venv/
+vnev/
+.venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+.eggs/
+build/
+pip-wheel-metadata/
+*.manifest
+*.spec
+/dist/
+
+# Test / lint caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+# ML weights & generated artifacts (deploy / train separately)
+artifacts/models/
+!artifacts/README.md
+*.pt
+*.pth
+*.onnx
+*.weights
+tools/ml/models/*
+!tools/ml/models/.gitkeep
+!tools/ml/models/README.md
+
+# Training / inference outputs
+runs/
+outputs/
+wandb/
+smartroad_dl_*/
+tools/ml/runs/
+tools/ml/datasets/
+!tools/ml/datasets/README.md
+
+# Dataset (download_data.py)
+/Pothole-Detection--2/
+Pothole-Detection--2/
+
+# GIS + local field uploads (regenerate / runtime)
+data/logs/
+data/smartroad.pid
+data/gunicorn.pid
+data/.schema_init.lock
+data/pids/
+data/detect_queue/
+nohup.out
+
+data/gis/
+data/gis_states/
+data/reporter_otps.json
+data/field_uploads/*
+data/finalize_queue/pending/
+data/finalize_queue/running/
+data/finalize_queue/done/
+data/finalize_queue/failed/
+backend/data/finalize_queue/pending/
+backend/data/finalize_queue/running/
+backend/data/finalize_queue/done/
+backend/data/finalize_queue/failed/
+backend/data/detect_queue/
+!data/field_uploads/.gitkeep
+!data/finalize_queue/.gitkeep
+cache/
+tools/data/
+*.osm.pbf
+tools/ml/incoming/images/
+tools/ml/incoming/labels/
+scripts/assessment_results.json
+
+# Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+
+# Legacy
+templates/
+static/
+
+# IDE
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+*.iml
+
+# OS
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+/nul
+nul
+
+# Logs / temp
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+*.cache
+gradio_cached_examples/
+flagged/
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Local DB dumps
+*.sql.gz
+*.dump
+*.sqlite
+*.sqlite3
+*.db
+
+# Cursor / Claude local tooling
+.cursor/
+agent-transcripts/
+.claude/
+**/.claude/
+
+# Local scratch / private notes (not needed in the repo)
+# Keep docs/ops/*.md and docs/README.md tracked.
+docs/notes/
+todo.txt
+**/todo.txt
+TODO.md
+**/TODO.md
+todo.md
+**/todo.md
+prompt.txt
+**/prompt.txt
+video_upload_check.txt
+**/video_upload_check.txt
+cred.txt
+**/cred.txt
+scratch/
+*.local.md
+
+# Legacy weight path (pre-restructure)
+fine_tuned_yolov12/
+
+# Mobile APK builds (distribute separately; never commit)
+apk/
+*.apk
+
+# Expo field app — deps & generated native trees
+mobile_app/node_modules/
+mobile_app/.expo/
+mobile_app/dist/
+mobile_app/web-build/
+mobile_app/expo-env.d.ts
+mobile_app/.metro-health-check*
+mobile_app/ios/
+mobile_app/android/
+mobile_app/*.jks
+mobile_app/*.p8
+mobile_app/*.p12
+mobile_app/*.mobileprovision
+mobile_app/.env
+mobile_app/.env.local
+
+reporter_app/android/
+reporter_app/node_modules/
+reporter_app/.expo/
+reporter_app/dist/
+reporter_app/.env
+reporter_app/.env.local
+
+# Kotlin / IDE session junk
+**/.kotlin/
+*.salive

@@ -1,0 +1,52 @@
+:root {
+  --bg: #eef1f4;
+  --surface: #ffffff;
+  --surface-2: #e4e9ee;
+  --border: rgba(15, 58, 95, 0.10);
+  --border-strong: rgba(15, 58, 95, 0.22);
+  --accent: #0f3a5f;
+  --accent-dark: #0a2540;
+  --accent-dim: rgba(15, 58, 95, 0.12);
+  --text: #16202a;
+  --muted: #5b6b78;
+  --success: #1e7a4c;
+  --warn: #c98a1a;
+  --danger: #b3261e;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --font: "DM Sans", "Outfit", system-ui, sans-serif;
+  --mono: "JetBrains Mono", monospace;
+  --shadow-sm: 0 1px 2px rgba(15, 58, 95, 0.06);
+  --shadow-md: 0 8px 30px rgba(15, 58, 95, 0.10);
+
+  /* Solid-fill chrome (sidebar + topbar) — deliberately not a --surface variant */
+  --chrome-bg: #0f3a5f;
+  --chrome-bg-2: #0b2c48;
+  --chrome-text: #ffffff;
+  --chrome-text-muted: rgba(255, 255, 255, 0.72);
+  --chrome-border: rgba(255, 255, 255, 0.16);
+  --assignment: #6366f1;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent-dark); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.app-shell {
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+

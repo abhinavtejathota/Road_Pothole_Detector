@@ -1,0 +1,4 @@
+# Ignore uploaded media; keep folder markers in git.
+*
+!.gitignore
+!.gitkeep

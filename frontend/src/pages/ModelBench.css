@@ -1,0 +1,198 @@
+.bench-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.bench-controls .form-group {
+  flex: 1 1 200px;
+  margin: 0;
+}
+
+.bench-cam-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.bench-page.bench-busy {
+  pointer-events: none;
+  user-select: none;
+}
+.bench-page.bench-busy .det-running-overlay {
+  pointer-events: auto;
+}
+
+.bench-cam-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.bench-cam-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Explicit frame so phone portrait video isn't clipped to the top by max-height. */
+.bench-cam-frame {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 4 / 3;
+  max-height: min(56vh, 480px);
+  background: #0b1220;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bench-page .det-media,
+.bench-cam-media {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center center;
+  background: transparent;
+}
+
+.bench-cam-frame .det-preview-empty {
+  padding: 1.25rem 0.85rem;
+}
+
+.bench-page .card:has(.card-header) {
+  overflow: visible;
+}
+
+.bench-page .card-body {
+  overflow: visible;
+}
+
+.det-link-list {
+  margin: 0.25rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.map-links-panel {
+  margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.map-links-ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  background: var(--accent-dark);
+  color: #fff;
+}
+
+.map-links-ribbon-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.map-links-sort {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.map-links-sort .select {
+  min-width: 7.5rem;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.5rem;
+}
+
+.map-links-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0.85rem;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.map-links-list li {
+  padding: 0.35rem 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  word-break: break-all;
+  border-bottom: 1px solid var(--border);
+}
+
+.map-links-list li:last-child {
+  border-bottom: none;
+}
+
+.map-links-list a {
+  color: var(--accent-dark);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.det-dash-wrap {
+  max-width: 100%;
+}
+
+.det-dash-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.det-hint {
+  background: rgba(15, 58, 95, 0.05);
+  border: 1px solid rgba(15, 58, 95, 0.12);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.det-hint strong { color: var(--accent-dark); }
+.det-hint ul { margin: 0.35rem 0 0 1.1rem; padding: 0; }
+.det-hint li { margin: 0.2rem 0; }
+
+.det-running-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  border-radius: inherit;
+}
+
+.det-card-relative {
+  position: relative;
+}
+

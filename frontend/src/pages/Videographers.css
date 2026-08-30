@@ -1,0 +1,26 @@
+.vg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.vg-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.vg-selected-hint {
+  margin: 0;
+  font-size: 0.82rem;
+}
+.vg-creds {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border, #e5e8ee);
+  border-radius: 8px;
+  background: #f7f9fb;
+}
+.vg-creds code {
+  font-size: 0.95rem;
+}
