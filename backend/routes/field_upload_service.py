@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Optional
 
+import smartroad_path
 from s3_utils import (
     DEFAULT_MULTIPART_PART_SIZE,
     MIN_MULTIPART_PART_SIZE,
@@ -25,7 +26,7 @@ from s3_utils import (
     upload_part_file,
 )
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = smartroad_path.ROOT
 LOCAL_UPLOAD_DIR = ROOT / "data" / "field_uploads"
 
 # Classic phone→Flask is used for all field uploads now; this threshold is only
@@ -1052,7 +1053,7 @@ def _run_finalize_subprocess(payload: dict) -> dict:
     import sys
     import tempfile
 
-    root = Path(__file__).resolve().parents[2]
+    root = ROOT
     script = root / "scripts" / "finalize_chunk_job.py"
     timeout = int(os.getenv("FINALIZE_JOB_TIMEOUT_S", "1800"))
     fd_in, in_path = tempfile.mkstemp(prefix="sr_fin_in_", suffix=".json")

@@ -85,7 +85,9 @@ async function request(path, options = {}) {
   const { retries, retryDelayMs = 800, noRetry = false, ...rest } = options;
   const max = noRetry
     ? 1
-    : Math.max(1, Number(retries ?? (method === "GET" || method === "HEAD" ? 10 : 1)));
+    // Keep GET retries low — a wedged server + many retries piles CLOSE_WAIT and
+    // starves Waitress until a restart. Busy-DB endpoints opt into higher counts.
+    : Math.max(1, Number(retries ?? (method === "GET" || method === "HEAD" ? 3 : 1)));
 
   let last;
   for (let i = 0; i < max; i++) {
@@ -109,7 +111,7 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  me: () => request("/api/auth/me", { timeoutMs: 15000, retries: 6 }),
+  me: () => request("/api/auth/me", { timeoutMs: 12000, retries: 2 }),
   login: (username, password) =>
     request("/api/auth/login", {
       method: "POST",
@@ -120,12 +122,12 @@ export const api = {
   logout: () =>
     request("/api/auth/logout", { method: "POST", timeoutMs: 5000, noRetry: true }),
 
-  dashboard: () => request("/api/dashboard", { timeoutMs: 90000, retries: 8 }),
-  adminDashboard: (params) => request(`/api/admin-dashboard${params || ""}`, { timeoutMs: 30000, retries: 4 }),
+  dashboard: () => request("/api/dashboard", { timeoutMs: 45000, retries: 1 }),
+  adminDashboard: (params) => request(`/api/admin-dashboard${params || ""}`, { timeoutMs: 30000, retries: 2 }),
   adminDashboardVideos: (params) =>
-    request(`/api/admin-dashboard/videos${params || ""}`, { timeoutMs: 60000, retries: 3 }),
+    request(`/api/admin-dashboard/videos${params || ""}`, { timeoutMs: 60000, retries: 2 }),
   adminDashboardVideoDetail: (sessionId) =>
-    request(`/api/admin-dashboard/videos/${sessionId}`, { timeoutMs: 45000, retries: 3 }),
+    request(`/api/admin-dashboard/videos/${sessionId}`, { timeoutMs: 45000, retries: 2 }),
   adminDashboardVideoRequeue: (sessionId) =>
     request(`/api/admin-dashboard/videos/${sessionId}/requeue`, {
       method: "POST",
@@ -133,18 +135,18 @@ export const api = {
       noRetry: true,
     }),
   adminDashboardMembers: (params) =>
-    request(`/api/admin-dashboard/members${params || ""}`, { timeoutMs: 45000, retries: 3 }),
+    request(`/api/admin-dashboard/members${params || ""}`, { timeoutMs: 45000, retries: 2 }),
   adminDashboardKmCoverage: (params) =>
-    request(`/api/admin-dashboard/km-coverage${params || ""}`, { timeoutMs: 30000, retries: 3 }),
+    request(`/api/admin-dashboard/km-coverage${params || ""}`, { timeoutMs: 30000, retries: 2 }),
   adminDashboardKmCoverageClass: (roadClass, params) =>
     request(`/api/admin-dashboard/km-coverage/${encodeURIComponent(roadClass)}${params || ""}`, {
-      timeoutMs: 90000,
-      retries: 2,
+      timeoutMs: 60000,
+      retries: 1,
     }),
   adminDashboardPotholes: (params) =>
-    request(`/api/admin-dashboard/potholes${params || ""}`, { timeoutMs: 30000, retries: 3 }),
+    request(`/api/admin-dashboard/potholes${params || ""}`, { timeoutMs: 30000, retries: 2 }),
   adminDashboardPotholeDetails: (params) =>
-    request(`/api/admin-dashboard/potholes/details${params || ""}`, { timeoutMs: 45000, retries: 3 }),
+    request(`/api/admin-dashboard/potholes/details${params || ""}`, { timeoutMs: 45000, retries: 2 }),
   adminDashboardPotholeImagesZipUrl: (params) =>
     `/api/admin-dashboard/potholes/images-zip${params || ""}`,
   downloadAdminPotholeImages: async (params) => {
@@ -186,7 +188,7 @@ export const api = {
       body: JSON.stringify(body || {}),
       noRetry: true,
     }),
-  mapData: () => request("/api/dashboard/map-data", { timeoutMs: 90000, retries: 6 }),
+  mapData: () => request("/api/dashboard/map-data", { timeoutMs: 30000, retries: 1 }),
 
   users: () => request("/api/users", { timeoutMs: 60000, retries: 8 }),
   createUser: (body) =>

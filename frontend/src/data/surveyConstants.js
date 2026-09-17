@@ -25,9 +25,10 @@ export const STATE_META = {
   },
 };
 
-export const MAP_TILE_URL = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+// OSM raster tiles — no API key (CARTO basemaps now watermark without one).
+export const MAP_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 export const MAP_TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
 export const ROAD_CLASS = {
   nh: { label: "National highway", color: "#dc2626", order: 1 },

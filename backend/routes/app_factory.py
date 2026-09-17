@@ -451,13 +451,33 @@ def create_app(service: str | None = None):
     return app
 
 
+def _loopback_port_busy(port: int) -> bool:
+    """True if something already accepts TCP on 127.0.0.1:port (second web_app)."""
+    import socket
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        sock.settimeout(0.75)
+        return sock.connect_ex(("127.0.0.1", int(port))) == 0
+    except OSError:
+        return False
+    finally:
+        try:
+            sock.close()
+        except OSError:
+            pass
+
+
 def run_service(service: str, default_port: int) -> None:
-    application = create_app(service)
     port = int(os.getenv("FLASK_PORT", str(default_port)))
     debug = os.getenv("FLASK_DEBUG", "false").lower() in ("1", "true", "yes")
     host = os.getenv("WAITRESS_HOST", "0.0.0.0")
     engine = (os.getenv("SMARTROAD_SERVER") or "waitress").strip().lower()
-    threads = max(8, int(os.getenv("WAITRESS_THREADS", "32")))
+    threads = max(1, int(os.getenv("WAITRESS_THREADS", "32")))
+    # Reclaim half-closed browser sockets before Waitress workers starve (CLOSE_WAIT).
+    channel_timeout = max(15, int(os.getenv("WAITRESS_CHANNEL_TIMEOUT", "60")))
+    cleanup_interval = max(5, int(os.getenv("WAITRESS_CLEANUP_INTERVAL", "10")))
+    connection_limit = max(8, int(os.getenv("WAITRESS_CONNECTION_LIMIT", "64")))
 
     if debug and host not in ("127.0.0.1", "localhost", "::1"):
         raise RuntimeError(
@@ -467,6 +487,21 @@ def run_service(service: str, default_port: int) -> None:
         )
     if debug and _is_production_env():
         raise RuntimeError("FLASK_DEBUG is forbidden when SMARTROAD_ENV=production.")
+
+    # Two monoliths on the same port leave CLOSE_WAIT piles and hung logins.
+    if os.getenv("SMARTROAD_ALLOW_PORT_REUSE", "").strip().lower() not in (
+        "1",
+        "true",
+        "yes",
+    ):
+        if _loopback_port_busy(port):
+            raise SystemExit(
+                f"Port {port} is already in use — another SmartRoad process is "
+                f"probably still running. Stop it first (don't start a second "
+                f"python web_app.py). Override with SMARTROAD_ALLOW_PORT_REUSE=1."
+            )
+
+    application = create_app(service)
 
     if os.getenv("SMARTROAD_QUIET_LOGS", "1").lower() in ("1", "true", "yes"):
         import logging
@@ -502,7 +537,9 @@ def run_service(service: str, default_port: int) -> None:
         return
 
     print(
-        f"Waitress threads={threads} on {host}:{port} service={service}",
+        f"Waitress threads={threads} on {host}:{port} service={service} "
+        f"(channel_timeout={channel_timeout}s cleanup={cleanup_interval}s "
+        f"conn_limit={connection_limit})",
         flush=True,
     )
     try:
@@ -527,7 +564,8 @@ def run_service(service: str, default_port: int) -> None:
         host=host,
         port=port,
         threads=threads,
-        channel_timeout=int(os.getenv("WAITRESS_CHANNEL_TIMEOUT", "180")),
-        cleanup_interval=30,
+        channel_timeout=channel_timeout,
+        cleanup_interval=cleanup_interval,
+        connection_limit=connection_limit,
         asyncore_use_poll=True,
     )

@@ -15,7 +15,9 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-_ROOT = Path(__file__).resolve().parents[2]
+import smartroad_path
+
+_ROOT = smartroad_path.ROOT
 QUEUE_ROOT = Path(os.getenv("FINALIZE_QUEUE_DIR", str(_ROOT / "data" / "finalize_queue")))
 PENDING = QUEUE_ROOT / "pending"
 RUNNING = QUEUE_ROOT / "running"

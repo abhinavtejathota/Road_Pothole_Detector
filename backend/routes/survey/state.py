@@ -19,7 +19,9 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-ROOT = Path(__file__).resolve().parents[2]  # routes/survey/state.py → repo root
+import smartroad_path
+
+ROOT = smartroad_path.ROOT
 STATES_DIR = ROOT / "data" / "gis_states"
 GIS = ROOT / "data" / "gis"  # runtime survey_state.json only
 STATE_PATH = GIS / "survey_state.json"

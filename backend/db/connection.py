@@ -71,10 +71,29 @@ _POOL_HOST = None  # host used when _POOL was created
 _POOL_OPEN_LOCK = threading.Lock()  # single-flight open (no stampede)
 _POOL_FAILS = 0  # consecutive checkout failures before any rare reset
 _POOL_LAST_RESET = 0.0
+_CHECKOUT_SEM: threading.BoundedSemaphore | None = None
+_CHECKOUT_SEM_SIZE = 0
 # Dedicated pools so a stuck close/ping cannot starve checkout forever.
-# Sized large enough for concurrent Waitress threads waiting on getconn/ping.
-_PING_EXEC = ThreadPoolExecutor(max_workers=64, thread_name_prefix="db-ping")
-_CLOSE_EXEC = ThreadPoolExecutor(max_workers=8, thread_name_prefix="db-close")
+_PING_EXEC = ThreadPoolExecutor(max_workers=16, thread_name_prefix="db-ping")
+_CLOSE_EXEC = ThreadPoolExecutor(max_workers=4, thread_name_prefix="db-close")
+
+
+def _release_slot() -> None:
+    sem = _CHECKOUT_SEM
+    if sem is None:
+        return
+    try:
+        sem.release()
+    except ValueError:
+        # Extra release — ignore (BoundedSemaphore).
+        pass
+
+
+def _acquire_slot(timeout_s: float) -> bool:
+    sem = _CHECKOUT_SEM
+    if sem is None:
+        return True
+    return bool(sem.acquire(timeout=max(0.05, float(timeout_s))))
 
 
 class _PooledConnection(psycopg2.extensions.connection if _HAS_PSYCOPG2 else object):
@@ -82,7 +101,11 @@ class _PooledConnection(psycopg2.extensions.connection if _HAS_PSYCOPG2 else obj
 
     def close(self):
         pool = getattr(self, "_pool_ref", None)
+        held = bool(getattr(self, "_slot_held", False))
         if pool is None or self.closed:
+            if held:
+                self._slot_held = False
+                _release_slot()
             return super().close()
         try:
             if self.get_transaction_status() != psycopg2.extensions.TRANSACTION_STATUS_IDLE:
@@ -93,6 +116,10 @@ class _PooledConnection(psycopg2.extensions.connection if _HAS_PSYCOPG2 else obj
                 pool.putconn(self, close=True)
             except Exception:
                 pass
+        finally:
+            if held:
+                self._slot_held = False
+                _release_slot()
 
 
 def is_db_configured() -> bool:
@@ -102,30 +129,29 @@ def is_db_configured() -> bool:
 
 
 def _discard_conn(pool, conn) -> None:
-    """Drop one bad connection; keep the rest of the sticky pool alive."""
+    """Drop one bad connection synchronously so the checkout slot is freed now."""
     if conn is None:
         return
-
-    def _do():
+    held = bool(getattr(conn, "_slot_held", False))
+    try:
         try:
-            try:
-                conn.cancel()
-            except Exception:
-                pass
-            try:
-                pool.putconn(conn, close=True)
-            except Exception:
-                try:
-                    super(_PooledConnection, conn).close()
-                except Exception:
-                    pass
+            conn.cancel()
         except Exception:
             pass
-
-    try:
-        _CLOSE_EXEC.submit(_do)
-    except Exception:
-        pass
+        try:
+            pool.putconn(conn, close=True)
+        except Exception:
+            try:
+                super(_PooledConnection, conn).close()
+            except Exception:
+                pass
+    finally:
+        if held:
+            try:
+                conn._slot_held = False
+            except Exception:
+                pass
+            _release_slot()
 
 
 def _web_thread_hint() -> int:
@@ -206,7 +232,12 @@ def _open_pool(db_host: str):
     )
     if sslmode:
         kwargs["sslmode"] = sslmode
-    return psycopg2.pool.ThreadedConnectionPool(minconn, maxconn, **kwargs)
+    pool = psycopg2.pool.ThreadedConnectionPool(minconn, maxconn, **kwargs)
+    global _CHECKOUT_SEM, _CHECKOUT_SEM_SIZE
+    # Cap concurrent checkouts to pool size — never pile blocked getconn() waiters.
+    _CHECKOUT_SEM = threading.BoundedSemaphore(maxconn)
+    _CHECKOUT_SEM_SIZE = maxconn
+    return pool
 
 
 def _pool():
@@ -232,7 +263,10 @@ def _pool():
         with _POOL_LOCK:
             _POOL = pool
             _POOL_HOST = db_host
-        print("[db] sticky pool ready", flush=True)
+        print(
+            f"[db] sticky pool ready (checkout slots={_CHECKOUT_SEM_SIZE})",
+            flush=True,
+        )
         return _POOL
 
 
@@ -282,7 +316,7 @@ def reset_pool(reason: str = "", force: bool = False) -> None:
     Prefer discarding one bad connection. Force only on host change or
     many consecutive total failures.
     """
-    global _POOL, _POOL_HOST, _POOL_FAILS, _POOL_LAST_RESET
+    global _POOL, _POOL_HOST, _POOL_FAILS, _POOL_LAST_RESET, _CHECKOUT_SEM, _CHECKOUT_SEM_SIZE
     min_gap = float(os.getenv("DB_POOL_RESET_MIN_GAP_S", "60"))
     now = time.monotonic()
     if not force and (now - _POOL_LAST_RESET) < min_gap:
@@ -299,6 +333,8 @@ def reset_pool(reason: str = "", force: bool = False) -> None:
         _POOL_HOST = None
         _POOL_FAILS = 0
         _POOL_LAST_RESET = now
+        _CHECKOUT_SEM = None
+        _CHECKOUT_SEM_SIZE = 0
     print(f"[db] reset_pool({reason or 'manual'})", flush=True)
     if old is None:
         return
@@ -337,56 +373,52 @@ def _ping_conn(conn, timeout_s: float) -> None:
         ) from e
 
 
-def _getconn_timed(pool, timeout_s: float):
-    """Wait for a free pooled connection — prefer queueing over failing the request."""
-    fut = _PING_EXEC.submit(pool.getconn)
-    try:
-        return fut.result(timeout=timeout_s)
-    except FuturesTimeout as e:
-        raise TimeoutError(
-            f"Database pool checkout timed out after {timeout_s:.0f}s "
-            "(all connections busy — raise DB_POOL_MAX / DB_POOL_HARD_CAP, "
-            "or lower WAITRESS_THREADS)"
-        ) from e
-
-
 def _get_conn():
-    """Checkout from the sticky pool. Queue generously; never reset the pool here."""
+    """Checkout from the sticky pool. Queue on a semaphore sized to maxconn."""
     global _POOL_FAILS
     if not _HAS_PSYCOPG2:
         raise RuntimeError("psycopg2 not installed. Run: pip install psycopg2-binary")
     pool = _pool()
     last_err = None
-    # Long waits + retries: under load we queue for a free conn instead of 502/outage.
-    attempts = max(1, int(os.getenv("DB_POOL_GET_RETRIES", "10")))
-    delay = float(os.getenv("DB_POOL_GET_RETRY_S", "0.2"))
+    attempts = max(1, int(os.getenv("DB_POOL_GET_RETRIES", "2")))
+    delay = float(os.getenv("DB_POOL_GET_RETRY_S", "0.15"))
     ping_s = float(os.getenv("DB_PING_TIMEOUT_S", "2.0"))
-    get_s = float(os.getenv("DB_POOL_GET_TIMEOUT_S", "45"))
+    get_s = float(os.getenv("DB_POOL_GET_TIMEOUT_S", "8"))
     for _i in range(attempts):
-        conn = None
-        try:
-            conn = _getconn_timed(pool, get_s)
-        except (psycopg2.pool.PoolError, TimeoutError) as e:
-            last_err = e
+        if not _acquire_slot(get_s):
+            last_err = TimeoutError(
+                f"Database pool checkout timed out after {get_s:.0f}s "
+                "(all connections busy — raise DB_POOL_MAX / DB_POOL_HARD_CAP, "
+                "or lower WAITRESS_THREADS)"
+            )
             time.sleep(delay * (1.0 + 0.15 * _i))
             continue
-        if conn is None:
-            continue
-        if conn.closed:
-            _discard_conn(pool, conn)
-            continue
+        conn = None
         try:
-            _ping_conn(conn, ping_s)
+            # Slot held ⇒ getconn should not block long (sem == pool max).
+            conn = pool.getconn()
+            if conn is None or conn.closed:
+                _release_slot()
+                if conn is not None:
+                    try:
+                        pool.putconn(conn, close=True)
+                    except Exception:
+                        pass
+                continue
+            conn._slot_held = True
             conn._pool_ref = pool
+            _ping_conn(conn, ping_s)
             _POOL_FAILS = 0
             return conn
         except Exception as e:
             last_err = e
-            _discard_conn(pool, conn)
+            if conn is not None:
+                _discard_conn(pool, conn)
+            else:
+                _release_slot()
             time.sleep(delay)
 
     _POOL_FAILS += 1
-    # Do not tear down the sticky pool — that causes open-timeout stampedes.
     raise last_err or RuntimeError("Database connection pool exhausted or unreachable")
 
 

@@ -9,7 +9,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-ROOT = Path(__file__).resolve().parents[2]  # routes/tracking/store.py → repo root
+import smartroad_path
+
+ROOT = smartroad_path.ROOT
 STATE_PATH = ROOT / "data" / "gis" / "tracking_state.json"
 IST = ZoneInfo("Asia/Kolkata")
 

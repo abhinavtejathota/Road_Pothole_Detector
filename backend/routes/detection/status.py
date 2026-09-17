@@ -24,7 +24,9 @@ from s3_utils import (
 # module load pulls ultralytics→torch, and with gunicorn --preload that
 # initializes CUDA in the master before fork (broken GPU in workers).
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]  # routes/detection/status.py → repo root
+import smartroad_path
+
+PROJECT_ROOT = smartroad_path.ROOT
 OUTPUTS_ROOT = PROJECT_ROOT / "outputs"
 ALLOWED_SERVE_ROOTS = (OUTPUTS_ROOT.resolve(),)
 _DETECT_LOCK = PROJECT_ROOT / "data" / ".detection.lock"

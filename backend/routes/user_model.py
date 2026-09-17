@@ -12,7 +12,7 @@ import db_utils
 # upload don't pay a full round-trip for the same session user each time.
 _USER_CACHE: dict[int, tuple[float, "User"]] = {}
 _USER_CACHE_LOCK = threading.Lock()
-_USER_CACHE_TTL_SEC = float(__import__("os").getenv("USER_CACHE_TTL_S", "15"))
+_USER_CACHE_TTL_SEC = float(__import__("os").getenv("USER_CACHE_TTL_S", "60"))
 
 
 def invalidate_user_cache(user_id: int | None = None) -> None:

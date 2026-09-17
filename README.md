@@ -82,7 +82,7 @@ flowchart TB
 
 **Monolith mode (dev / simple deploy):** one process (`python web_app.py`) serves API + SPA on a single port. Upload and detection run in-process.
 
-**Supabase free tier (current remote DB):** use **only** the monolith — `python web_app.py`. Do **not** start portal + upload + detect as separate processes with large pools (`DB_POOL_MAX` / `WAITRESS_THREADS` must stay small; see `.env.example`). Multi-process split will exhaust the pooler connection budget. Prefer session pooler + `DB_SSLMODE=require`. Demo app logins: [`credentials.json`](credentials.json).
+**Supabase free tier (current remote DB):** use **only** the monolith — `python web_app.py`. Do **not** start portal + upload + detect as separate processes with large pools (`DB_POOL_MAX` / `DB_POOL_HARD_CAP` ≤ 4; `WAITRESS_THREADS` ≤ 4). Multi-process split will exhaust the pooler connection budget. Prefer session pooler + `DB_SSLMODE=require`. Keep GIS on disk (`data/gis_states/` via `tools/gis/*`) — do **not** run `scripts/seed_roads_registry.py` against free tier. Demo app logins: [`credentials.json`](credentials.json).
 
 **Split mode (AceCloud / self-hosted Postgres):** nginx routes `/api/upload*` → upload service, `/api/detection*` and `/api/model-bench*` → detect service, everything else → portal. A finalize worker drains the chunk-concat / S3 queue. See [docs/ops/MULTI_SERVICE.md](docs/ops/MULTI_SERVICE.md).
 

@@ -17,8 +17,10 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+import smartroad_path
+
 IST = ZoneInfo("Asia/Kolkata")
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = smartroad_path.ROOT
 LOGO_CANDIDATES = [
     ROOT / "frontend" / "public" / "logo.png",
     ROOT / "frontend" / "src" / "styles" / "logo.jpeg",

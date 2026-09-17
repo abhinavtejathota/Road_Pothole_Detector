@@ -25,8 +25,9 @@ from typing import Any
 import db_utils
 from routes.reporter_service import normalize_mobile
 from routes.reporter_token_auth import issue_reporter_token, reporter_token_ttl_s
+import smartroad_path
 
-_ROOT = Path(__file__).resolve().parents[2]
+_ROOT = smartroad_path.ROOT
 _OTP_JSON = Path(os.getenv("REPORTER_OTP_JSON", str(_ROOT / "data" / "reporter_otps.json")))
 
 

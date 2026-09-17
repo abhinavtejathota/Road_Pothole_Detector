@@ -31,10 +31,16 @@ _GPS_COVERAGE_LOCK = threading.Lock()
 _GPS_COVERAGE_TTL = float(os.getenv("GPS_COVERAGE_CACHE_S", "15"))
 
 
+def _dashboard_light() -> bool:
+    """Supabase free / tiny pools: soft-fail fast, skip map blobs."""
+    return (os.getenv("DASHBOARD_LIGHT") or "").strip().lower() in ("1", "true", "yes")
+
+
 def _dashboard_section(label, fn):
     """Dashboard section: short retry, then soft-empty — never stampede the pool."""
+    attempts = 1 if _dashboard_light() else 2
     try:
-        return _retry_until(label, fn, attempts=2, delay_s=0.2)
+        return _retry_until(label, fn, attempts=attempts, delay_s=0.15)
     except Exception as e:
         print(f"[dashboard] {label} gave up: {e}", flush=True)
         return None
@@ -48,7 +54,12 @@ def _gps_coverage_cached():
         hit = _GPS_COVERAGE_CACHE.get("data")
         if hit is not None and (now - float(_GPS_COVERAGE_CACHE.get("ts") or 0)) < _GPS_COVERAGE_TTL:
             return hit
-    data = _retry_until("gps_coverage", tracking_service.aggregate_gps_coverage_bundle)
+    data = _retry_until(
+        "gps_coverage",
+        tracking_service.aggregate_gps_coverage_bundle,
+        attempts=1 if _dashboard_light() else 2,
+        delay_s=0.15,
+    )
     with _GPS_COVERAGE_LOCK:
         _GPS_COVERAGE_CACHE["ts"] = now
         _GPS_COVERAGE_CACHE["data"] = data
@@ -56,19 +67,25 @@ def _gps_coverage_cached():
 
 
 def _maybe_refresh_warranty():
-    """At most once per hour — full UPDATE on every page load made dashboard feel dead."""
+    """At most once per hour — never block the dashboard request on the pool."""
     global _DASHBOARD_WARRANTY_TS
+
+    if _dashboard_light():
+        return  # free-tier: skip background UPDATE entirely
 
     now = time.time()
     with _DASHBOARD_WARRANTY_LOCK:
         if now - _DASHBOARD_WARRANTY_TS < 3600:
             return
         _DASHBOARD_WARRANTY_TS = now
-    try:
-        _retry_until("refresh_warranty", db_utils.refresh_warranty_statuses, attempts=3)
-    except Exception as e:
-        # Background refresh — do not block the whole dashboard paint.
-        print(f"[dashboard] refresh_warranty gave up: {e}", flush=True)
+
+    def _run():
+        try:
+            _retry_until("refresh_warranty", db_utils.refresh_warranty_statuses, attempts=1, delay_s=0.1)
+        except Exception as e:
+            print(f"[dashboard] refresh_warranty gave up: {e}", flush=True)
+
+    threading.Thread(target=_run, name="warranty-refresh", daemon=True).start()
 
 
 @api_bp.route("/dashboard")
@@ -106,22 +123,58 @@ def dashboard_all():
             "role_view": "videographer",
         }
     elif is_staff:
-        gps_bundle = _dashboard_section("gps_coverage", _gps_coverage_cached) or {
-            "all": {}, "by_state": {}, "date": None,
-        }
+        map_limit = int(os.getenv("DASHBOARD_MAP_LIMIT", "0" if _dashboard_light() else "1500"))
+        t0 = time.perf_counter()
+        print(
+            f"[dashboard] staff light={_dashboard_light()} map_limit={map_limit}",
+            flush=True,
+        )
+        if _dashboard_light():
+            # Free-tier: avoid multi-statement staff_bundle + GPS rollups (pool contention
+            # with flask-login user loads). Empty KPIs are correct until real ops data exists.
+            bundle = {
+                "kpi": {
+                    "total_sessions": 0,
+                    "total_potholes": 0,
+                    "total_work_orders": 0,
+                    "unassigned": 0,
+                    "allocated": 0,
+                    "wip": 0,
+                    "completed": 0,
+                    "verified": 0,
+                    "failed": 0,
+                    "sla_breached": 0,
+                    "unassigned_sessions": 0,
+                },
+                "breached": [],
+                "vendors": [],
+                "warranty": [],
+                "map": [],
+            }
+            gps_bundle = {"all": {}, "by_state": {}, "date": None}
+            print(f"[dashboard] staff light skip-db {time.perf_counter()-t0:.2f}s", flush=True)
+        else:
+            bundle = _dashboard_section(
+                "staff_bundle",
+                lambda: db_utils.get_staff_dashboard_bundle(map_limit=map_limit),
+            ) or {}
+            print(f"[dashboard] staff_bundle {time.perf_counter()-t0:.2f}s", flush=True)
+            t1 = time.perf_counter()
+            gps_bundle = _dashboard_section("gps_coverage", _gps_coverage_cached) or {
+                "all": {}, "by_state": {}, "date": None,
+            }
+            print(f"[dashboard] gps {time.perf_counter()-t1:.2f}s", flush=True)
         payload = {
-            "kpi": _dashboard_section("kpi", db_utils.get_kpi_summary),
-            "breached": _dashboard_section("breached", db_utils.get_sla_breached_tasks),
-            "vendors": _dashboard_section("vendors", db_utils.get_vendor_performance_report),
-            "warranty": _dashboard_section("warranty", db_utils.get_warranty_dashboard),
-            "map": _dashboard_section(
-                "map",
-                lambda: db_utils.get_pothole_map_data(limit=int(os.getenv("DASHBOARD_MAP_LIMIT", "1500"))),
-            ),
+            "kpi": bundle.get("kpi"),
+            "breached": bundle.get("breached"),
+            "vendors": bundle.get("vendors"),
+            "warranty": bundle.get("warranty"),
+            "map": bundle.get("map") if map_limit > 0 else [],
             "gps_coverage": gps_bundle.get("all") or {},
             "gps_coverage_by_state": gps_bundle.get("by_state") or {},
             "role_view": "admin",
         }
+        print(f"[dashboard] staff total {time.perf_counter()-t0:.2f}s", flush=True)
     else:
         payload = {"role_view": "unknown"}
 
