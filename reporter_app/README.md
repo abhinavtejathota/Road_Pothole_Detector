@@ -1,6 +1,7 @@
 # SmartRoad Citizen — reporter-only React Native (Expo) app
 
 Mobile OTP login + file/track complaint. No admin/staff login.
+Enhanced with hooks, components, validators, formatters, and offline draft queue.
 
 ## DB
 

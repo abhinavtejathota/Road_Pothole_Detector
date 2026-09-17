@@ -10,7 +10,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { api, setToken } from '../api';
+import { api } from '../api';
 import { formatIndianMobile, isValidIndianMobile, nationalMobileDigits } from '../mobile';
 
 export default function LoginScreen({ onLoggedIn }) {
@@ -46,7 +46,8 @@ export default function LoginScreen({ onLoggedIn }) {
     setError('');
     try {
       const out = await api.verifyOtp(mobile, otp);
-      await setToken(out.access_token);
+      // Token storage and /me fetch are handled by useAuth.login (onLoggedIn).
+      // Do NOT call setToken here — it would race with the hook.
       onLoggedIn(out);
     } catch (e) {
       setError(e.message || 'Invalid OTP');
