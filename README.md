@@ -82,7 +82,9 @@ flowchart TB
 
 **Monolith mode (dev / simple deploy):** one process (`python web_app.py`) serves API + SPA on a single port. Upload and detection run in-process.
 
-**Split mode (AceCloud):** nginx routes `/api/upload*` → upload service, `/api/detection*` and `/api/model-bench*` → detect service, everything else → portal. A finalize worker drains the chunk-concat / S3 queue. See [docs/ops/MULTI_SERVICE.md](docs/ops/MULTI_SERVICE.md).
+**Supabase free tier (current remote DB):** use **only** the monolith — `python web_app.py`. Do **not** start portal + upload + detect as separate processes with large pools (`DB_POOL_MAX` / `WAITRESS_THREADS` must stay small; see `.env.example`). Multi-process split will exhaust the pooler connection budget. Prefer session pooler + `DB_SSLMODE=require`. Demo app logins: [`credentials.json`](credentials.json).
+
+**Split mode (AceCloud / self-hosted Postgres):** nginx routes `/api/upload*` → upload service, `/api/detection*` and `/api/model-bench*` → detect service, everything else → portal. A finalize worker drains the chunk-concat / S3 queue. See [docs/ops/MULTI_SERVICE.md](docs/ops/MULTI_SERVICE.md).
 
 ---
 
@@ -332,7 +334,10 @@ python scripts/apply_db_migrations.py
 python scripts/bootstrap_admin.py   # creates DevAdmin — change password immediately
 
 python web_app.py                   # default port from FLASK_PORT (often 5005)
-# Separate terminal — required for finalize + auto-detect:
+# Against Supabase free tier: stop here (monolith only). Do NOT run
+# ./scripts/services.sh or separate upload/detect processes.
+
+# Optional separate terminal — finalize + auto-detect (self-hosted / AceCloud only):
 python scripts/smartroad_worker.py
 ```
 
@@ -382,6 +387,8 @@ Requires `--yes` to delete. Re-run the GIS steps above (and re-download datasets
 
 ## 10. Production / multi-service
 
+**Not for Supabase free tier.** Split mode needs a Postgres that can absorb several app pools (portal + upload + detect). On Supabase free, stay on one local `python web_app.py` process.
+
 On AceCloud-style hosts:
 
 | Process | Entry | Typical internal port |
@@ -407,6 +414,8 @@ Under load, read APIs **retry** rather than returning empty fail-soft payloads; 
 | Doc | Topic |
 |-----|--------|
 | [CLAUDE.md](CLAUDE.md) | Contributor / agent guidance for this repo |
+| [`.bob/rules/`](.bob/rules/) | IBM Bob workspace rules (token-efficient agent behavior) |
+| [`credentials.json`](credentials.json) | Demo app login usernames/passwords by role |
 | [docs/README.md](docs/README.md) | Doc folder map |
 | [docs/ops/PROJECT_SETUP.md](docs/ops/PROJECT_SETUP.md) | Local setup, GPS log shapes |
 | [docs/ops/DEPLOYMENT.md](docs/ops/DEPLOYMENT.md) | Full deploy notes |

@@ -6,10 +6,11 @@ import math
 import os
 import time
 
-# db package module
+# db package module — load repo-root .env (not backend/.env)
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=True)
+_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(_ROOT / ".env", override=True)
 
 import os
 import socket
@@ -129,16 +130,15 @@ def _discard_conn(pool, conn) -> None:
 
 def _web_thread_hint() -> int:
     """Best-effort count of concurrent request threads this process may run."""
-    hint = 32
     for key in ("WAITRESS_THREADS", "GUNICORN_THREADS", "SMARTROAD_THREADS"):
         raw = os.getenv(key)
         if not raw:
             continue
         try:
-            hint = max(hint, int(raw))
+            return max(1, int(raw))
         except ValueError:
             pass
-    return max(8, hint)
+    return 32
 
 
 def _pool_bounds() -> tuple[int, int]:
@@ -148,6 +148,7 @@ def _pool_bounds() -> tuple[int, int]:
     Defaults: max ≈ web_threads + headroom, capped by DB_POOL_HARD_CAP
     (leave room for sibling portal/upload/detect processes on the same Postgres).
     Explicit DB_POOL_MIN / DB_POOL_MAX always win (still hard-capped).
+    On managed free tiers (e.g. Supabase), set DB_POOL_MAX / DB_POOL_HARD_CAP low (2–5).
     """
     threads = _web_thread_hint()
     headroom = int(os.getenv("DB_POOL_HEADROOM", "64"))
@@ -160,11 +161,11 @@ def _pool_bounds() -> tuple[int, int]:
     else:
         # At least 64 so a 32-thread box still has spare; grow with Waitress.
         maxconn = max(64, suggested)
-    maxconn = max(8, min(maxconn, hard_cap))
+    maxconn = max(1, min(maxconn, hard_cap))
     if os.getenv("DB_POOL_MIN"):
         minconn = int(os.getenv("DB_POOL_MIN"))
     else:
-        minconn = min(max(16, maxconn // 3), maxconn)
+        minconn = min(max(1, maxconn // 3), maxconn)
     minconn = max(1, min(minconn, maxconn))
     return minconn, maxconn
 
@@ -183,9 +184,9 @@ def _open_pool(db_host: str):
         flush=True,
     )
     # No idle_session_timeout — that killed idle pooled sockets and forced reopen storms.
-    return psycopg2.pool.ThreadedConnectionPool(
-        minconn,
-        maxconn,
+    # DB_SSLMODE: require for Supabase / managed Postgres; leave empty for local.
+    sslmode = (os.getenv("DB_SSLMODE") or "").strip()
+    kwargs = dict(
         connection_factory=_PooledConnection,
         host=db_host,
         port=int(os.getenv("DB_PORT", "5432")),
@@ -203,6 +204,9 @@ def _open_pool(db_host: str):
             f"{int(os.getenv('DB_IDLE_IN_TX_TIMEOUT_MS', '60000'))}"
         ),
     )
+    if sslmode:
+        kwargs["sslmode"] = sslmode
+    return psycopg2.pool.ThreadedConnectionPool(minconn, maxconn, **kwargs)
 
 
 def _pool():

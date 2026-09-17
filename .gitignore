@@ -4,7 +4,7 @@
 !.env.example
 *.pem
 *.key
-credentials.json
+# Root demo app logins are tracked (credentials.json). Keep .env gitignored for DB/AWS secrets.
 secrets.json
 .aws/
 
@@ -158,6 +158,7 @@ flagged/
 agent-transcripts/
 .claude/
 **/.claude/
+# IBM Bob project rules (.bob/) ARE versioned — do not ignore them
 
 # Local scratch / private notes (not needed in the repo)
 # Keep docs/ops/*.md and docs/README.md tracked.

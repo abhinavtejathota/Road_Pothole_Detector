@@ -6,10 +6,11 @@ import math
 import os
 import time
 
-# db package module
+# db package module — load repo-root .env (not backend/.env)
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=True)
+_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(_ROOT / ".env", override=True)
 
 import os
 import socket
